@@ -37,6 +37,9 @@ Some ideas for improvements:
 ---
 
 ## 📅 Changelog
+### v0.2.0-beta (2025-07-27)
+- Added horizontal table scrolling on mobile devices
+- Fixed tables being unreadable on mobile devices
 ### v0.1.0-beta (2025-07-24)
 - Initial beta release
 - Displays leaderboard with static data
