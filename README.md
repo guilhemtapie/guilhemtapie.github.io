@@ -32,7 +32,7 @@ Some ideas for improvements:
 - [ ] **Localization** - Add different localizations for the most used languages.
 - [ ] **Emulator Filter** - Add support for record obtained on emulator.
 - [ ] **Countries Statistics** - Add a column for the country of origin.
-- [ ] **Where Am I?** - Show the users their position in the leadeboard.
+- [ ] **Where Am I?** - Show to the users their position in the leadeboard.
 
 ---
 
