@@ -13,6 +13,8 @@ body {
     margin: 20px auto;
     padding: 0 15px;
     font-size: 16px; /* Better base font size for mobile */
+    background-color: #ffe6e6 !important; /* OBVIOUS MOBILE TEST - Light pink background */
+    border: 5px solid red !important; /* OBVIOUS MOBILE TEST - Red border */
   }
 }
 
