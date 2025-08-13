@@ -10,6 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light theme">🌙</button>
   <h1>Pokeathlon World Records</h1>
   <p>Since the release of HG/SS, Pokeathlon has been an endless source of entertainment for many people. During these years people have shared their PBs in many different forums and websites, our goal is to create the go-to place for pokeathlon enjoyers.</p>
   <h2>Course World Records</h2>
@@ -183,6 +184,7 @@ Position points: 100-80-70-60.
 <script src="js/tablesort.min.js"></script>
 <script src="js/tablesort.number.min.js"></script>
 <script src="js/tablesort.date.js"></script>
+<script src="js/theme-toggle.js"></script>
 <script>
     document.querySelectorAll('table').forEach(table => {
         const sort = new Tablesort(table);
@@ -192,5 +194,6 @@ Position points: 100-80-70-60.
 
 </body>
 </html>
+
 
 
