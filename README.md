@@ -25,10 +25,10 @@ This is a beta version – expect updates and improvements.
 ## 🛠 Future Improvements
 Some ideas for improvements:
 - [ ] **Filters for Events** – Add the same filters of the courses in the single event section.
-- [ ] **Mobile Design** – Optimize layout for mobile and tablet devices.
+- [x] **Mobile Design** – Optimize layout for mobile and tablet devices.
 - [ ] **Player Profiles** – Add a profile page for each player with stats.
 - [ ] **Real-time Updates** – Fetch leaderboard data via an API instead of static files.
-- [ ] **Dark Mode** – Add a toggle for dark/light theme.
+- [x] **Dark Mode** – Add a toggle for dark/light theme.
 - [ ] **Localization** - Add different localizations for the most used languages.
 - [ ] **Emulator Filter** - Add support for record obtained on emulator.
 - [ ] **Countries Statistics** - Add a column for the country of origin.
@@ -37,6 +37,8 @@ Some ideas for improvements:
 ---
 
 ## 📅 Changelog
+### v0.3.0-beta (2025-08-13)
+- Added a toggle for dark/light theme
 ### v0.2.0-beta (2025-07-27)
 - Added horizontal table scrolling on mobile devices
 - Fixed tables being unreadable on mobile devices
