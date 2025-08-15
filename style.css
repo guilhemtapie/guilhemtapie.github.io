@@ -85,7 +85,7 @@ body {
   color: var(--text-color);
   max-width: 960px;
   margin: 40px auto;
-  padding: 0 20px;
+  padding: 10px 20px;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -93,7 +93,7 @@ body {
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 20px auto;
-    padding: 0 15px;
+    padding: 25px 15px 0px 15px; /* <-- This line updated */
     font-size: 16px; /* Better base font size for mobile */
   }
 }
@@ -321,4 +321,213 @@ nav a {
 .table-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb);
   opacity: 0.8;
+}
+
+/* POKEMON PID CALCULATOR SPECIFIC STYLES */
+/* Add these to your existing style.css file */
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+  .input-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+
+.input-group select {
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  font-size: 14px;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.input-group select:focus {
+  outline: 2px solid var(--link-color);
+  outline-offset: -2px;
+}
+
+.calculate-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  border: 2px solid var(--border-color);
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  text-transform: uppercase;
+}
+
+.calculate-btn:hover {
+  background: var(--table-header-bg);
+}
+
+.calculate-btn:active {
+  background: var(--filter-text-muted);
+  color: var(--bg-color);
+}
+
+.results {
+  margin-top: 20px;
+  padding: 20px;
+  background: var(--filter-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.results h3 {
+  margin-top: 0;
+  color: var(--filter-heading);
+  font-weight: bold;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 5px;
+}
+
+.result-item {
+  background: var(--table-header-bg);
+  padding: 8px 12px;
+  margin: 5px 0;
+  border: 1px solid var(--border-color);
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.loading {
+  text-align: center;
+  color: var(--filter-text-muted);
+  font-style: italic;
+}
+
+.no-results {
+  color: var(--filter-text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .results {
+    margin: 20px -15px 0 -15px;
+    border-radius: 0;
+  }
+  
+  .result-item {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* LEFT SIDEBAR TOGGLE BUTTON */
+.menu-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: var(--filter-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-color);
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 18px;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.menu-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+/* SIDEBAR MENU */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100%;
+  background-color: var(--filter-bg);
+  color: var(--text-color);
+  box-shadow: 2px 0 5px var(--shadow-color);
+  padding: 20px;
+  z-index: 999;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  transform: translateX(-100%);
+  padding-top: 80px; /* Creates space at the top for the button */
+  box-sizing: border-box; /* Ensures padding doesn't break the layout */
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+
+.sidebar h3 {
+  font-size: 1em;
+  margin: 0 0 10px 0; /* Changed top margin from 20px to 0 */
+  cursor: pointer;
+  color: var(--filter-heading);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 5px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 10px 0;
+  display: none;
+}
+
+.sidebar ul li {
+  margin: 5px 0;
+}
+
+.sidebar ul li a {
+  color: var(--link-color);
+  text-decoration: none;
+  font-size: 0.95em;
+}
+
+.sidebar ul li a:hover {
+  text-decoration: underline;
+}
+
+.sidebar h3.active + ul {
+  display: block;
 }
