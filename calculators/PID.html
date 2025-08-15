@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pokémon PID Calculator</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" href="../championship-trophy.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light theme">🌙</button>
+  <nav><a href="../index.html">← Back to All Events</a></nav>
+
+  <h1>Pokémon PID Calculator</h1>
+  <p>This calculator helps you find optimal PIDs for Pokéathlon based on your desired star requirements and available apricorns. It brute forces through 100,000 possible PIDs to find the ones that give you the most viable days out of 31.</p>
+  
+  <div class="filter-container">
+    <h3>⭐ Additional Stars Required</h3>
+    <div class="input-grid">
+      <div class="input-group">
+        <label for="power-stars">Power</label>
+        <select id="power-stars">
+          <option value="4">4 stars</option>
+          <option value="3">3 stars</option>
+          <option value="2">2 stars</option>
+          <option value="1">1 star</option>
+          <option value="0" selected>0 stars</option>
+          <option value="-1">-1 star</option>
+          <option value="-2">-2 stars</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="stamina-stars">Stamina</label>
+        <select id="stamina-stars">
+          <option value="4">4 stars</option>
+          <option value="3">3 stars</option>
+          <option value="2">2 stars</option>
+          <option value="1">1 star</option>
+          <option value="0" selected>0 stars</option>
+          <option value="-1">-1 star</option>
+          <option value="-2">-2 stars</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="skill-stars">Skill</label>
+        <select id="skill-stars">
+          <option value="4">4 stars</option>
+          <option value="3">3 stars</option>
+          <option value="2">2 stars</option>
+          <option value="1">1 star</option>
+          <option value="0" selected>0 stars</option>
+          <option value="-1">-1 star</option>
+          <option value="-2">-2 stars</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="jump-stars">Jump</label>
+        <select id="jump-stars">
+          <option value="4">4 stars</option>
+          <option value="3">3 stars</option>
+          <option value="2">2 stars</option>
+          <option value="1">1 star</option>
+          <option value="0" selected>0 stars</option>
+          <option value="-1">-1 star</option>
+          <option value="-2">-2 stars</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="speed-stars">Speed</label>
+        <select id="speed-stars">
+          <option value="4">4 stars</option>
+          <option value="3">3 stars</option>
+          <option value="2">2 stars</option>
+          <option value="1">1 star</option>
+          <option value="0" selected>0 stars</option>
+          <option value="-1">-1 star</option>
+          <option value="-2">-2 stars</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-container">
+    <h3>🍎 Flavors</h3>
+    <div class="input-grid">
+      <div class="input-group">
+        <label for="spicy-apricorns">Spicy (Red, Power)</label>
+        <select id="spicy-apricorns">
+          <option value="50">50</option>
+          <option value="49">49</option>
+          <option value="48">48</option>
+          <option value="2">2</option>
+          <option value="1">1</option>
+          <option value="0" selected>0</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="sour-apricorns">Sour (Yellow, Stamina)</label>
+        <select id="sour-apricorns">
+          <option value="50">50</option>
+          <option value="49">49</option>
+          <option value="48">48</option>
+          <option value="2">2</option>
+          <option value="1">1</option>
+          <option value="0" selected>0</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="dry-apricorns">Dry (Blu, Skill)</label>
+        <select id="dry-apricorns">
+          <option value="50">50</option>
+          <option value="49">49</option>
+          <option value="48">48</option>
+          <option value="2">2</option>
+          <option value="1">1</option>
+          <option value="0" selected>0</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="bitter-apricorns">Bitter (Green, Jump)</label>
+        <select id="bitter-apricorns">
+          <option value="50">50</option>
+          <option value="49">49</option>
+          <option value="48">48</option>
+          <option value="2">2</option>
+          <option value="1">1</option>
+          <option value="0" selected>0</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="sweet-apricorns">Sweet (Pink, Speed)</label>
+        <select id="sweet-apricorns">
+          <option value="50">50</option>
+          <option value="49">49</option>
+          <option value="48">48</option>
+          <option value="2">2</option>
+          <option value="1">1</option>
+          <option value="0" selected>0</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="calculate-btn" onclick="calculateBestPID()">
+    Calculate Best PID
+  </button>
+
+  <div id="results" class="results" style="display: none;">
+    <h3>📊 Results</h3>
+    <div id="results-content"></div>
+  </div>
+
+  <script src="../js/theme-toggle.js"></script>
+  <script>
+    const NATURE_BONUS = 35;
+    const NATURE_BONUS_LOW = 10;
+
+    const courseNames = ["Power", "Stamina", "Skill", "Jump", "Speed"];
+    const flavorNames = ["Spicy", "Sour", "Dry", "Bitter", "Sweet"];
+    const apricorns = ["Red", "Yellow", "Blue", "Green", "Pink"];
+    
+    const natureNames = [
+        "Hardy", "Lonely", "Brave", "Adamant", "Naughty", "Bold", "Docile",
+        "Relaxed", "Impish", "Lax", "Timid", "Hasty", "Serious", "Jolly",
+        "Naive", "Modest", "Mild", "Quiet", "Bashful", "Rash", "Calm",
+        "Gentle", "Sassy", "Careful", "Quirky"
+    ];
+
+    const natureStats = [
+        [+NATURE_BONUS_LOW, 0, 0, 0, -NATURE_BONUS_LOW],
+        [+NATURE_BONUS, -NATURE_BONUS, 0, 0, 0],
+        [+NATURE_BONUS, 0, 0, 0, -NATURE_BONUS],
+        [+NATURE_BONUS, 0, 0, -NATURE_BONUS, 0],
+        [+NATURE_BONUS, 0, -NATURE_BONUS, 0, 0],
+        [-NATURE_BONUS, +NATURE_BONUS, 0, 0, 0],
+        [0, +NATURE_BONUS_LOW, 0, -NATURE_BONUS_LOW, 0],
+        [0, +NATURE_BONUS, 0, 0, -NATURE_BONUS],
+        [0, +NATURE_BONUS, 0, -NATURE_BONUS, 0],
+        [0, +NATURE_BONUS, -NATURE_BONUS, 0, 0],
+        [-NATURE_BONUS, 0, 0, 0, +NATURE_BONUS],
+        [0, -NATURE_BONUS, 0, 0, +NATURE_BONUS],
+        [0, 0, -NATURE_BONUS_LOW, 0, +NATURE_BONUS_LOW],
+        [0, 0, 0, -NATURE_BONUS, +NATURE_BONUS],
+        [0, 0, -NATURE_BONUS, 0, +NATURE_BONUS],
+        [-NATURE_BONUS, 0, 0, +NATURE_BONUS, 0],
+        [0, -NATURE_BONUS, 0, +NATURE_BONUS, 0],
+        [0, 0, 0, +NATURE_BONUS, -NATURE_BONUS],
+        [-NATURE_BONUS_LOW, 0, 0, +NATURE_BONUS_LOW, 0],
+        [0, 0, -NATURE_BONUS, +NATURE_BONUS, 0],
+        [-NATURE_BONUS, 0, +NATURE_BONUS, 0, 0],
+        [0, -NATURE_BONUS, +NATURE_BONUS, 0, 0],
+        [0, 0, +NATURE_BONUS, 0, -NATURE_BONUS],
+        [0, 0, +NATURE_BONUS, -NATURE_BONUS, 0],
+        [0, -NATURE_BONUS_LOW, +NATURE_BONUS_LOW, 0, 0]
+    ];
+
+    function calculateBestPID() {
+        const resultsDiv = document.getElementById('results');
+        const resultsContent = document.getElementById('results-content');
+        
+        // Show loading state
+        resultsDiv.style.display = 'block';
+        resultsContent.innerHTML = '<div class="loading">🔄 Calculating... This may take a moment...</div>';
+        
+        // Use setTimeout to allow UI to update before heavy computation
+        setTimeout(() => {
+            try {
+                const result = performCalculation();
+                displayResults(result);
+            } catch (error) {
+                resultsContent.innerHTML = `<div class="no-results">❌ Error: ${error.message}</div>`;
+            }
+        }, 100);
+    }
+
+    function performCalculation() {
+        // Get star requirements
+        const starInputs = ['power-stars', 'stamina-stars', 'skill-stars', 'jump-stars', 'speed-stars'];
+        const threshold = [];
+        
+        for (let i = 0; i < 5; i++) {
+            const stars = parseInt(document.getElementById(starInputs[i]).value);
+            switch (stars) {
+                case 4: threshold[i] = 120; break;
+                case 3: threshold[i] = 80; break;
+                case 2: threshold[i] = 40; break;
+                case 1: threshold[i] = 15; break;
+                case 0: threshold[i] = -14; break;
+                case -1: threshold[i] = -39; break;
+                case -2: threshold[i] = -100; break;
+                default: throw new Error(`Invalid star value: ${stars}`);
+            }
+        }
+
+        // Get apricorn values
+        const apricornInputs = ['spicy-apricorns', 'sour-apricorns', 'dry-apricorns', 'bitter-apricorns', 'sweet-apricorns'];
+        const temp = [];
+        
+        for (let i = 0; i < 5; i++) {
+            temp[i] = parseInt(document.getElementById(apricornInputs[i]).value);
+        }
+
+        // Calculate juice bonuses
+        let maxValue = temp[0];
+        let minValue = temp[0];
+        let maxIdx = 0;
+        let minIdx = 0;
+
+        for (let i = 1; i < 5; i++) {
+            if (temp[i] > maxValue) {
+                maxValue = temp[i];
+                maxIdx = i;
+            }
+            if (temp[i] <= minValue) {
+                minValue = temp[i];
+                minIdx = i;
+            }
+        }
+
+        let secondVal = -1;
+        let secondIdx = -1;
+        for (let i = 0; i < 5; i++) {
+            if (i !== maxIdx && temp[i] > secondVal) {
+                secondVal = temp[i];
+                secondIdx = i;
+            }
+        }
+
+        const juice = [0, 0, 0, 0, 0];
+        juice[maxIdx] = Math.floor(maxValue * 1.5) + 10;
+        juice[secondIdx] = Math.floor(secondVal * 1.5);
+        juice[minIdx] = -Math.floor((maxValue + secondVal) * 0.1);
+
+        // Main PID search loop
+        let bestPid = 0;
+        let bestDays = 0;
+        const results = [];
+
+        for (let pid = 0; pid < 100000; pid++) {
+            let tempPid = pid;
+            const p = [];
+            
+            for (let i = 0; i < 5; i++) {
+                p[i] = (tempPid === 0) ? 0 : tempPid % 10;
+                tempPid = Math.floor(tempPid / 10);
+            }
+
+            const natureId = pid % 25;
+            let compDays = 0;
+            let flag = true;
+
+            for (let day = 1; day <= 31; day++) {
+                for (let i = 0; i < 5 && flag; i++) {
+                    const dailyMod = (((day + i + 3) * (day - i + 7) + p[i]) % 10) * 2 - 9;
+                    if (dailyMod + natureStats[natureId][i] + juice[i] < threshold[i]) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    compDays++;
+                } else {
+                    flag = true;
+                }
+            }
+
+            if (compDays > bestDays) {
+                bestDays = compDays;
+                bestPid = pid;
+                results.push({
+                    pid: bestPid,
+                    nature: natureNames[bestPid % 25],
+                    days: bestDays
+                });
+            }
+        }
+
+        return results;
+    }
+
+    function displayResults(results) {
+        const resultsContent = document.getElementById('results-content');
+        
+        if (results.length === 0) {
+            resultsContent.innerHTML = '<div class="no-results">❌ No viable PIDs found with the given parameters.</div>';
+            return;
+        }
+
+        let html = '<h4>🏆 Best Results (showing progression):</h4>';
+        
+        // Show last 10 results or all if fewer
+        const displayResults = results.slice(-10);
+        
+        displayResults.forEach((result, index) => {
+            html += `
+                <div class="result-item">
+                    <strong>PID:</strong> ${result.pid} | 
+                    <strong>Nature:</strong> ${result.nature} | 
+                    <strong>Viable Days:</strong> ${result.days}/31
+                </div>
+            `;
+        });
+
+        if (results.length > 10) {
+            html += `<p style="margin-top: 10px; color: var(--filter-text-muted); font-style: italic;">Showing last 10 of ${results.length} improvements found</p>`;
+        }
+
+        resultsContent.innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>
