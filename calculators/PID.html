@@ -271,9 +271,9 @@
         juice[minIdx] = -Math.floor((maxValue + secondVal) * 0.1);
 
         // Main PID search loop
-        let bestPid = 0;
         let bestDays = 0;
         const results = [];
+        const seenNatures = new Set(); // Track natures we've seen for the current best day count
 
         for (let pid = 0; pid < 100000; pid++) {
             let tempPid = pid;
@@ -285,6 +285,7 @@
             }
 
             const natureId = pid % 25;
+            const natureName = natureNames[natureId];
             let compDays = 0;
             let flag = true;
 
@@ -302,13 +303,24 @@
                 }
             }
 
+            // Add result if:
+            // 1. Better day count than current best
+            // 2. Same day count as current best but different nature (and days > 0)
             if (compDays > bestDays) {
                 bestDays = compDays;
-                bestPid = pid;
+                seenNatures.clear(); // Reset seen natures for new best
+                seenNatures.add(natureName);
                 results.push({
-                    pid: bestPid,
-                    nature: natureNames[bestPid % 25],
-                    days: bestDays
+                    pid: pid,
+                    nature: natureName,
+                    days: compDays
+                });
+            } else if (compDays === bestDays && compDays > 0 && !seenNatures.has(natureName)) {
+                seenNatures.add(natureName);
+                results.push({
+                    pid: pid,
+                    nature: natureName,
+                    days: compDays
                 });
             }
         }
@@ -324,24 +336,35 @@
             return;
         }
 
-        let html = '<h4>🏆 Best Results (showing progression):</h4>';
+        let html = '<h4>🏆 Best Results (showing all improvements and nature variations):</h4>';
         
-        // Show last 10 results or all if fewer
-        const displayResults = results.slice(-10);
-        
-        displayResults.forEach((result, index) => {
-            html += `
-                <div class="result-item">
-                    <strong>PID:</strong> ${result.pid} | 
-                    <strong>Nature:</strong> ${result.nature} | 
-                    <strong>Viable Days:</strong> ${result.days}/31
-                </div>
-            `;
+        // Group results by day count for better display
+        const resultsByDays = {};
+        results.forEach(result => {
+            if (!resultsByDays[result.days]) {
+                resultsByDays[result.days] = [];
+            }
+            resultsByDays[result.days].push(result);
         });
 
-        if (results.length > 10) {
-            html += `<p style="margin-top: 10px; color: var(--filter-text-muted); font-style: italic;">Showing last 10 of ${results.length} improvements found</p>`;
-        }
+        // Sort day counts in descending order
+        const sortedDays = Object.keys(resultsByDays).sort((a, b) => b - a);
+
+        sortedDays.forEach(dayCount => {
+            const dayResults = resultsByDays[dayCount];
+            html += `<div style="margin: 15px 0;"><strong>${dayCount} viable days:</strong></div>`;
+            
+            dayResults.forEach(result => {
+                html += `
+                    <div class="result-item" style="margin-left: 20px;">
+                        <strong>PID:</strong> ${result.pid} | 
+                        <strong>Nature:</strong> ${result.nature}
+                    </div>
+                `;
+            });
+        });
+
+        html += `<p style="margin-top: 10px; color: var(--filter-text-muted); font-style: italic;">Total results found: ${results.length}</p>`;
 
         resultsContent.innerHTML = html;
     }
