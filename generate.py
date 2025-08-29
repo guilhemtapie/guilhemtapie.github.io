@@ -44,7 +44,7 @@ def event_format_proof_link(link, proof_type):
     else:
         return f'<a href="{link}">Link</a>'
 
-def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style):
+def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style, lower_is_better=False):
     top_scores = []
     top3_changes = []
     
@@ -102,7 +102,10 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
             
             # Update leaderboard
             top_scores.append((row_num, name, score, record))
-            top_scores.sort(key=lambda x: (-x[2], x[0]))
+            if lower_is_better:
+                top_scores.sort(key=lambda x: (x[2], x[0]))
+            else:
+                top_scores.sort(key=lambda x: (-x[2], x[0]))
             top_scores = top_scores[:3]
             
             # Check if leaderboard changed
@@ -194,7 +197,7 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
     
     # Generate HTML based on chosen style
     if html_style == "simple":
-        generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html)
+        generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html, lower_is_better=lower_is_better)
     else:
         generate_advanced_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html)
     
@@ -202,11 +205,14 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
     
     return record_improvements
 
-def generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_file):
+def generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_file, lower_is_better=False):
     """Generate the simple HTML file (based on block-smash.html format)"""
     
-    # Get current record (highest scoring record)
-    current_record = max(all_records, key=lambda x: x['total_score']) if all_records else None
+    # Get current record (best depending on event rule)
+    if all_records:
+        current_record = (min if lower_is_better else max)(all_records, key=lambda x: x['total_score'])
+    else:
+        current_record = None
     
     # Get record history (only records that made top 3 improvements)
     record_history = []
@@ -543,7 +549,8 @@ def generate_all_events():
             'score_col': 2,  # Column B (Hurdle Dash)
             'date_col': 12,  # Column L (Date)
             'link_col': 13,  # Column M (Link)
-            'output_file': 'events/hurdle-dash.html'
+            'output_file': 'events/hurdle-dash.html',
+            'lower_is_better': True
         },
         'Pennant Capture': {
             'score_col': 3,  # Column C (Pennant Capture)
@@ -624,7 +631,8 @@ def generate_all_events():
                 config['link_col'], 
                 event_name, 
                 config['output_file'], 
-                "simple"  # Use simple HTML style for events
+                "simple",  # Use simple HTML style for events
+                lower_is_better=config.get('lower_is_better', False)
             )
             
             total_improvements += len(improved_rows)
