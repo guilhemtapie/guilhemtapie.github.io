@@ -3,7 +3,7 @@ name: Build and Deploy Site
 on:
   push:
     paths:
-      - "scores.csv"       # Lance le workflow uniquement si le CSV change
+      - "events_data.csv"       # Lance le workflow uniquement si le CSV change
       - "generate.py"      # ou si le script change
 
 jobs:
