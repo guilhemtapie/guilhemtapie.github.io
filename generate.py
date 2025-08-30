@@ -545,11 +545,11 @@ def generate_index_html():
     # Get course world records
     course_records = {}
     course_configs = {
-        'Speed': 'csv/speed_course_data.csv',
-        'Power': 'csv/power_course_data.csv', 
-        'Skill': 'csv/skill_course_data.csv',
-        'Stamina': 'csv/stamina_course_data.csv',
-        'Jump': 'csv/jump_course_data.csv'
+        'Speed': 'csv/Pokeathlon WRs - Speed_Course.csv',
+        'Power': 'csv/Pokeathlon WRs - Power_Course.csv', 
+        'Skill': 'csv/Pokeathlon WRs - Skill_Course.csv',
+        'Stamina': 'csv/Pokeathlon WRs - Stamina_Course.csv',
+        'Jump': 'csv/Pokeathlon WRs - Jump_Course.csv'
     }
     
     for course_name, csv_file in course_configs.items():
@@ -601,7 +601,7 @@ def generate_index_html():
         'Goal Roll': {'score_col': 11, 'lower_is_better': False}
     }
     
-    events_csv = 'csv/events_data.csv'
+    events_csv = 'csv/Pokeathlon WRs - Events_best_scores.csv'
     if os.path.exists(events_csv):
         try:
             with open(events_csv, newline='', encoding='utf-8') as f:
@@ -842,7 +842,7 @@ def generate_all_courses():
     # Define all courses with their configurations
     courses_config = {
         'Speed Course': {
-            'csv_file': 'csv/speed_course_data.csv',
+            'csv_file': 'csv/Pokeathlon WRs - Speed_Course.csv',
             'score_col': 2,  # Column B (Total Score)
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
@@ -850,7 +850,7 @@ def generate_all_courses():
             'lower_is_better': False  # Higher score is better for courses
         },
         'Jump Course': {
-            'csv_file': 'csv/jump_course_data.csv',
+            'csv_file': 'csv/Pokeathlon WRs - Jump_Course.csv',
             'score_col': 2,  # Column B (Total Score)
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
@@ -858,7 +858,7 @@ def generate_all_courses():
             'lower_is_better': False
         },
         'Power Course': {
-            'csv_file': 'csv/power_course_data.csv',
+            'csv_file': 'csv/Pokeathlon WRs - Power_Course.csv',
             'score_col': 2,  # Column B (Total Score)
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
@@ -866,7 +866,7 @@ def generate_all_courses():
             'lower_is_better': False
         },
         'Skill Course': {
-            'csv_file': 'csv/skill_course_data.csv',
+            'csv_file': 'csv/Pokeathlon WRs - Skill_Course.csv',
             'score_col': 2,  # Column B (Total Score)
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
@@ -874,7 +874,7 @@ def generate_all_courses():
             'lower_is_better': False
         },
         'Stamina Course': {
-            'csv_file': 'csv/stamina_course_data.csv',
+            'csv_file': 'csv/Pokeathlon WRs - Stamina_Course.csv',
             'score_col': 2,  # Column B (Total Score)
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
@@ -992,7 +992,7 @@ def generate_all_events():
         }
     }
     
-    csv_file = 'csv/events_data.csv'
+    csv_file = 'csv/Pokeathlon WRs - Events_best_scores.csv'
     
     if not os.path.exists(csv_file):
         print(f"❌ File '{csv_file}' not found!")
