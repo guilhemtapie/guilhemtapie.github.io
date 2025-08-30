@@ -538,6 +538,302 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 
 # CSV export functions removed - not needed for HTML generation
 
+def generate_index_html():
+    """Generate the main index.html file with current world records"""
+    print("🏠 Generating index.html with current world records...")
+    
+    # Get course world records
+    course_records = {}
+    course_configs = {
+        'Speed': 'csv/speed_course_data.csv',
+        'Power': 'csv/power_course_data.csv', 
+        'Skill': 'csv/skill_course_data.csv',
+        'Stamina': 'csv/stamina_course_data.csv',
+        'Jump': 'csv/jump_course_data.csv'
+    }
+    
+    for course_name, csv_file in course_configs.items():
+        if os.path.exists(csv_file):
+            try:
+                with open(csv_file, newline='', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    rows = list(reader)
+                    if len(rows) > 1:  # Has data beyond header
+                        # Find best score (highest total score)
+                        best_record = None
+                        best_score = -1
+                        
+                        for row in rows[1:]:  # Skip header
+                            if len(row) >= 7:  # Ensure we have enough columns
+                                try:
+                                    total_score = parse_number(row[1])  # Column B (Total Score)
+                                    if total_score and total_score > best_score:
+                                        best_score = total_score
+                                        best_record = {
+                                            'player': row[0].strip(),
+                                            'total_score': int(total_score),
+                                            'event1': int(parse_number(row[2])) if parse_number(row[2]) else '--',
+                                            'event2': int(parse_number(row[3])) if parse_number(row[3]) else '--',
+                                            'event3': int(parse_number(row[4])) if parse_number(row[4]) else '--',
+                                            'bonus': int(parse_number(row[5])) if parse_number(row[5]) else '--',
+                                            'date': parse_date(row[6])  # Column G (Date)
+                                        }
+                                except (ValueError, IndexError):
+                                    continue
+                        
+                        if best_record:
+                            course_records[course_name] = best_record
+            except Exception as e:
+                print(f"⚠️ Warning: Could not read {csv_file}: {e}")
+    
+    # Get event world records
+    event_records = {}
+    event_configs = {
+        'Hurdle Dash': {'score_col': 2, 'lower_is_better': True},
+        'Pennant Capture': {'score_col': 3, 'lower_is_better': False},
+        'Circle Push': {'score_col': 4, 'lower_is_better': False},
+        'Block Smash': {'score_col': 5, 'lower_is_better': False},
+        'Disc Catch': {'score_col': 6, 'lower_is_better': False},
+        'Lamp Jump': {'score_col': 7, 'lower_is_better': False},
+        'Relay Run': {'score_col': 8, 'lower_is_better': True},
+        'Ring Drop': {'score_col': 9, 'lower_is_better': False},
+        'Snow Throw': {'score_col': 10, 'lower_is_better': False},
+        'Goal Roll': {'score_col': 11, 'lower_is_better': False}
+    }
+    
+    events_csv = 'csv/events_data.csv'
+    if os.path.exists(events_csv):
+        try:
+            with open(events_csv, newline='', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+                if len(rows) > 1:  # Has data beyond header
+                    for event_name, config in event_configs.items():
+                        best_record = None
+                        best_score = None
+                        
+                        for row in rows[1:]:  # Skip header
+                            if len(row) >= 13:  # Ensure we have enough columns
+                                try:
+                                    score = parse_number(row[config['score_col'] - 1])
+                                    if score is not None:
+                                        if best_score is None:
+                                            best_score = score
+                                            best_record = {
+                                                'player': row[0].strip(),
+                                                'score': score,
+                                                'points': int(parse_number(row[config['score_col'] - 1])) if not config['lower_is_better'] else int(parse_number(row[config['score_col'] - 1])),
+                                                'date': parse_date(row[11])  # Column L (Date)
+                                            }
+                                        elif config['lower_is_better']:
+                                            if score < best_score:
+                                                best_score = score
+                                                best_record = {
+                                                    'player': row[0].strip(),
+                                                    'score': score,
+                                                    'points': int(parse_number(row[config['score_col'] - 1])),
+                                                    'date': parse_date(row[11])
+                                                }
+                                        else:
+                                            if score > best_score:
+                                                best_score = score
+                                                best_record = {
+                                                    'player': row[0].strip(),
+                                                    'score': score,
+                                                    'points': int(parse_number(row[config['score_col'] - 1])),
+                                                    'date': parse_date(row[11])
+                                                }
+                                except (ValueError, IndexError):
+                                    continue
+                        
+                        if best_record:
+                            event_records[event_name] = best_record
+        except Exception as e:
+            print(f"⚠️ Warning: Could not read {events_csv}: {e}")
+    
+    # Generate the index.html content
+    html_content = '''<!DOCTYPE html>
+<html>
+<head>
+  <title>Pokeathlon World Records</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="championship-trophy.svg" type="image/svg+xml">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://pokeathlonhub.github.io/sitemap.xml">
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+  <meta name="google-site-verification" content="XzjYyqTL5gndXteUIgnJcXnqW4esQ7C0NCS717ZXt-U" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light theme">🌙</button>
+  <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
+
+  <div id="sidebar" class="sidebar">
+    <h3 id="coursesToggle">Courses</h3>
+    <ul id="coursesMenu">
+      <li><a href="courses/speed.html">Speed</a></li>
+      <li><a href="courses/power.html">Power</a></li>
+      <li><a href="courses/skill.html">Skill</a></li>
+      <li><a href="courses/stamina.html">Stamina</a></li>
+      <li><a href="courses/jump.html">Jump</a></li>
+    </ul>
+
+    <h3 id="eventsToggle">Events</h3>
+    <ul id="eventsMenu">
+      <li><a href="events/hurdle-dash.html">Hurdle Dash</a></li>
+      <li><a href="events/pennant-capture.html">Pennant Capture</a></li>
+      <li><a href="events/block-smash.html">Block Smash</a></li>
+      <li><a href="events/disc-catch.html">Disc Catch</a></li>
+      <li><a href="events/lamp-jump.html">Lamp Jump</a></li>
+      <li><a href="events/relay-run.html">Relay Run</a></li>
+      <li><a href="events/snow-throw.html">Snow Throw</a></li>
+      <li><a href="events/goal-roll.html">Goal Roll</a></li>
+    </ul>
+
+    <h3 id="calculatorsToggle">Calculators</h3>
+    <ul id="calculatorsMenu">
+      <li><a href="calculators/PID.html">PID</a></li>
+    </ul>
+  </div>
+
+  <h1>Pokeathlon World Records</h1>
+  <p>Since the release of HG/SS, Pokeathlon has been an endless source of entertainment for many people. During these years people have shared their PBs in many different forums and websites, our goal is to create the go-to place for pokeathlon enjoyers.</p>
+  
+  <h2>Course World Records</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Player</th>
+          <th>Total Score</th>
+          <th>First event</th>
+          <th>Second event</th>
+          <th>Third event</th>
+          <th>Bonus points</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>'''
+    
+    # Add course records
+    for course_name in ['Speed', 'Power', 'Skill', 'Stamina', 'Jump']:
+        if course_name in course_records:
+            record = course_records[course_name]
+            html_content += f'''
+        <tr>
+          <td><a href="courses/{course_name.lower()}.html">{course_name}</a></td>
+          <td>{record['player']}</td>
+          <td>{record['total_score']}</td>
+          <td>{record['event1']}</td>
+          <td>{record['event2']}</td>
+          <td>{record['event3']}</td>
+          <td>{record['bonus']}</td>
+          <td>{record['date'].strftime("%d/%m/%Y") if record['date'] else '--'}</td>
+        </tr>'''
+        else:
+            html_content += f'''
+        <tr>
+          <td><a href="courses/{course_name.lower()}.html">{course_name}</a></td>
+          <td>–</td>
+          <td>–</td>
+          <td>–</td>
+          <td>–</td>
+          <td>–</td>
+          <td>–</td>
+          <td>–</td>
+        </tr>'''
+    
+    html_content += '''
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Single Event World Records</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Player</th>
+          <th>Score</th>
+          <th>Points</th>
+          <th>Formula</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>'''
+    
+    # Add event records with formulas
+    event_formulas = {
+        'Hurdle Dash': r'\( \left\lfloor \frac{11500}{\text{score}} \right\rfloor \)',
+        'Pennant Capture': r'\( \text{score} \times 3 \)',
+        'Circle Push': r'\( \text{score} \times 3 \)',
+        'Block Smash': r'\( \text{score} \)',
+        'Disc Catch': r'\( 150 - \frac{1500}{\text{score} + 12.5} \)',
+        'Lamp Jump': r'\( \left\lfloor \frac{\text{score}}{3.5} \right\rfloor \)',
+        'Relay Run': r'\( \text{score} \times 10 \)',
+        'Ring Drop': r'\( \text{score} \times 1.5 \)',
+        'Snow Throw': r'\( \text{score} \times 3 \)',
+        'Goal Roll': r'\( \text{position_points} + \text{score} \times 5 \)'
+    }
+    
+    for event_name in ['Hurdle Dash', 'Pennant Capture', 'Circle Push', 'Block Smash', 'Disc Catch', 'Lamp Jump', 'Relay Run', 'Ring Drop', 'Snow Throw', 'Goal Roll']:
+        if event_name in event_records:
+            record = event_records[event_name]
+            # Format score based on event type
+            if event_name in ['Hurdle Dash', 'Relay Run']:
+                score_display = f"{record['score']:.1f}".replace('.', ',')
+            else:
+                score_display = str(int(record['score'])) if record['score'] == int(record['score']) else str(record['score'])
+            
+            html_content += f'''
+        <tr>
+          <td><a href="events/{event_name.lower().replace(' ', '-')}.html">{event_name}</a></td>
+          <td>{record['player']}</td>
+          <td>{score_display}</td>
+          <td>{record['points']}</td>
+          <td>{event_formulas[event_name]}</td>
+          <td>{record['date'].strftime("%d/%m/%Y") if record['date'] else '--'}</td>
+        </tr>'''
+        else:
+            html_content += f'''
+        <tr>
+          <td>{event_name}</td>
+          <td>–</td>
+          <td>–</td>
+          <td>–</td>
+          <td>{event_formulas.get(event_name, '–')}</td>
+          <td>–</td>
+        </tr>'''
+    
+    html_content += '''
+      </tbody>
+    </table>
+  </div>
+
+  <p>Position points: 100-80-70-60.</p>
+
+  <script src="js/tablesort.min.js"></script>
+  <script src="js/tablesort.number.min.js"></script>
+  <script src="js/tablesort.date.js"></script>
+  <script src="js/theme-toggle.js"></script>
+  <script src="js/sidebar-menu.js" defer></script>
+  <script>
+    document.querySelectorAll('table').forEach(table => {
+      const sort = new Tablesort(table);
+    });
+  </script>
+</body>
+</html>'''
+    
+    # Write to file
+    with open('index.html', 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"✅ index.html generated with current world records")
+    print(f"   - {len(course_records)} course records")
+    print(f"   - {len(event_records)} event records")
+
 def generate_all_courses():
     """Generate HTML files for all courses automatically"""
     print("🏆 Pokéathlon Course HTML Generator - Auto Mode")
@@ -750,6 +1046,12 @@ def generate_all():
     # Generate courses
     print("\n📋 GENERATING COURSES...")
     generate_all_courses()
+    
+    print("\n" + "=" * 60)
+    
+    # Generate index.html
+    print("\n📋 GENERATING INDEX.HTML...")
+    generate_index_html()
     
     print("\n" + "=" * 60)
     print("🎉 All HTML generation complete!")
