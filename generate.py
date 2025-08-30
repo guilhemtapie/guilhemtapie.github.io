@@ -595,7 +595,7 @@ def generate_index_html():
         'Block Smash': {'score_col': 5, 'lower_is_better': False},
         'Disc Catch': {'score_col': 6, 'lower_is_better': False},
         'Lamp Jump': {'score_col': 7, 'lower_is_better': False},
-        'Relay Run': {'score_col': 8, 'lower_is_better': True},
+        'Relay Run': {'score_col': 8, 'lower_is_better': False},
         'Ring Drop': {'score_col': 9, 'lower_is_better': False},
         'Snow Throw': {'score_col': 10, 'lower_is_better': False},
         'Goal Roll': {'score_col': 11, 'lower_is_better': False}
