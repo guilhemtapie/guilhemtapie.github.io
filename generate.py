@@ -44,7 +44,7 @@ def event_format_proof_link(link, proof_type):
     else:
         return f'<a href="{link}">Link</a>'
 
-def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style):
+def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style, lower_is_better=False):
     top_scores = []
     top3_changes = []
     
@@ -102,7 +102,10 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
             
             # Update leaderboard
             top_scores.append((row_num, name, score, record))
-            top_scores.sort(key=lambda x: (-x[2], x[0]))
+            if lower_is_better:
+                top_scores.sort(key=lambda x: (x[2], x[0]))
+            else:
+                top_scores.sort(key=lambda x: (-x[2], x[0]))
             top_scores = top_scores[:3]
             
             # Check if leaderboard changed
@@ -194,7 +197,7 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
     
     # Generate HTML based on chosen style
     if html_style == "simple":
-        generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html)
+        generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html, lower_is_better=lower_is_better)
     else:
         generate_advanced_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html)
     
@@ -202,11 +205,14 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
     
     return record_improvements
 
-def generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_file):
+def generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_file, lower_is_better=False):
     """Generate the simple HTML file (based on block-smash.html format)"""
     
-    # Get current record (highest scoring record)
-    current_record = max(all_records, key=lambda x: x['total_score']) if all_records else None
+    # Get current record (best depending on event rule)
+    if all_records:
+        current_record = (min if lower_is_better else max)(all_records, key=lambda x: x['total_score'])
+    else:
+        current_record = None
     
     # Get record history (only records that made top 3 improvements)
     record_history = []
@@ -532,6 +538,94 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 
 # CSV export functions removed - not needed for HTML generation
 
+def generate_all_courses():
+    """Generate HTML files for all courses automatically"""
+    print("🏆 Pokéathlon Course HTML Generator - Auto Mode")
+    print("=" * 50)
+    
+    # Define all courses with their configurations
+    courses_config = {
+        'Speed Course': {
+            'csv_file': 'csv/speed_course_data.csv',
+            'score_col': 2,  # Column B (Total Score)
+            'date_col': 7,   # Column G (Date)
+            'link_col': 8,   # Column H (Link)
+            'output_file': 'courses/speed.html',
+            'lower_is_better': False  # Higher score is better for courses
+        },
+        'Jump Course': {
+            'csv_file': 'csv/jump_course_data.csv',
+            'score_col': 2,  # Column B (Total Score)
+            'date_col': 7,   # Column G (Date)
+            'link_col': 8,   # Column H (Link)
+            'output_file': 'courses/jump.html',
+            'lower_is_better': False
+        },
+        'Power Course': {
+            'csv_file': 'csv/power_course_data.csv',
+            'score_col': 2,  # Column B (Total Score)
+            'date_col': 7,   # Column G (Date)
+            'link_col': 8,   # Column H (Link)
+            'output_file': 'courses/power.html',
+            'lower_is_better': False
+        },
+        'Skill Course': {
+            'csv_file': 'csv/skill_course_data.csv',
+            'score_col': 2,  # Column B (Total Score)
+            'date_col': 7,   # Column G (Date)
+            'link_col': 8,   # Column H (Link)
+            'output_file': 'courses/skill.html',
+            'lower_is_better': False
+        },
+        'Stamina Course': {
+            'csv_file': 'csv/stamina_course_data.csv',
+            'score_col': 2,  # Column B (Total Score)
+            'date_col': 7,   # Column G (Date)
+            'link_col': 8,   # Column H (Link)
+            'output_file': 'courses/stamina.html',
+            'lower_is_better': False
+        }
+    }
+    
+    print(f"📊 Processing {len(courses_config)} courses...")
+    print()
+    
+    total_improvements = 0
+    
+    for course_name, config in courses_config.items():
+        print(f"🔄 Processing {course_name}...")
+        
+        csv_file = config['csv_file']
+        if not os.path.exists(csv_file):
+            print(f"❌ File '{csv_file}' not found! Skipping...")
+            continue
+        
+        try:
+            # Run the analysis and generate HTML
+            improved_rows = leaderboard_analysis_with_html(
+                csv_file, 
+                config['score_col'], 
+                config['date_col'], 
+                config['link_col'], 
+                course_name, 
+                config['output_file'], 
+                "advanced",  # Use advanced HTML style for courses
+                lower_is_better=config.get('lower_is_better', False)
+            )
+            
+            total_improvements += len(improved_rows)
+            print(f"✅ {course_name}: {len(improved_rows)} improvements, HTML generated")
+            
+        except Exception as e:
+            print(f"❌ Error processing {course_name}: {str(e)}")
+        
+        print()
+    
+    print(f"🎯 Course Summary:")
+    print(f"- Processed {len(courses_config)} courses")
+    print(f"- Total improvements found: {total_improvements}")
+    print(f"- All HTML files generated in the 'courses' folder")
+
 def generate_all_events():
     """Generate HTML files for all events automatically"""
     print("🏆 Pokéathlon HTML Generator - Auto Mode")
@@ -543,7 +637,8 @@ def generate_all_events():
             'score_col': 2,  # Column B (Hurdle Dash)
             'date_col': 12,  # Column L (Date)
             'link_col': 13,  # Column M (Link)
-            'output_file': 'events/hurdle-dash.html'
+            'output_file': 'events/hurdle-dash.html',
+            'lower_is_better': True
         },
         'Pennant Capture': {
             'score_col': 3,  # Column C (Pennant Capture)
@@ -601,7 +696,7 @@ def generate_all_events():
         }
     }
     
-    csv_file = 'events_data.csv'
+    csv_file = 'csv/events_data.csv'
     
     if not os.path.exists(csv_file):
         print(f"❌ File '{csv_file}' not found!")
@@ -624,7 +719,8 @@ def generate_all_events():
                 config['link_col'], 
                 event_name, 
                 config['output_file'], 
-                "simple"  # Use simple HTML style for events
+                "simple",  # Use simple HTML style for events
+                lower_is_better=config.get('lower_is_better', False)
             )
             
             total_improvements += len(improved_rows)
@@ -635,12 +731,30 @@ def generate_all_events():
         
         print()
     
-    print(f"🎯 Summary:")
+    print(f"🎯 Events Summary:")
     print(f"- Processed {len(events_config)} events")
     print(f"- Total improvements found: {total_improvements}")
     print(f"- All HTML files generated in the 'events' folder")
 
+def generate_all():
+    """Generate HTML files for all events and courses"""
+    print("🏆 Pokéathlon Complete HTML Generator")
+    print("=" * 60)
+    
+    # Generate events first
+    print("\n📋 GENERATING EVENTS...")
+    generate_all_events()
+    
+    print("\n" + "=" * 60)
+    
+    # Generate courses
+    print("\n📋 GENERATING COURSES...")
+    generate_all_courses()
+    
+    print("\n" + "=" * 60)
+    print("🎉 All HTML generation complete!")
+
 # Main execution
 if __name__ == "__main__":
-    # Auto-generate all events
-    generate_all_events()
+    # Auto-generate all events and courses
+    generate_all()
