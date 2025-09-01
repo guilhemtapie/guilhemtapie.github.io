@@ -694,7 +694,7 @@ def generate_index_html():
                                         elif event_name == 'Snow Throw':
                                             points = min(200, int(score * 3)) if score else 0
                                         elif event_name == 'Goal Roll':
-                                            points = min(200, int(score * 5)) if score else 0  # Assuming position points = 0
+                                            points = min(200, int(100 + 5 * score)) if score else 0
                                         else:
                                             points = min(200, int(score)) if score else 0
                                         
@@ -867,9 +867,15 @@ def generate_index_html():
             else:
                 score_display = str(int(record['score'])) if record['score'] == int(record['score']) else str(record['score'])
             
+            # Check if event has a page (Circle Push and Ring Drop don't have pages)
+            if event_name in ['Circle Push', 'Ring Drop']:
+                event_cell = f'<td>{event_name}</td>'
+            else:
+                event_cell = f'<td><a href="events/{event_name.lower().replace(' ', '-')}.html">{event_name}</a></td>'
+            
             html_content += f'''
         <tr>
-          <td><a href="events/{event_name.lower().replace(' ', '-')}.html">{event_name}</a></td>
+          {event_cell}
           <td>{record['player']}</td>
           <td>{score_display}</td>
           <td>{record['points']}</td>
