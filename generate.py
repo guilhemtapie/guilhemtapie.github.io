@@ -44,7 +44,7 @@ def event_format_proof_link(link, proof_type):
     else:
         return f'<a href="{link}">Link</a>'
 
-def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style, lower_is_better=False):
+def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style, lower_is_better=False, event1_col=None, event2_col=None, event3_col=None, bonus_col=None):
     top_scores = []
     top3_changes = []
     
@@ -74,10 +74,10 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
                 'row_num': i + 1,
                 'player': row[0].strip(),
                 'total_score': parse_number(row[score_col - 1]),
-                'hurdle_dash': parse_number(row[2]) if len(row) > 2 else None,
-                'pennant_capture': parse_number(row[3]) if len(row) > 3 else None,
-                'relay_run': parse_number(row[4]) if len(row) > 4 else None,
-                'bonus_points': parse_number(row[5]) if len(row) > 5 else None,
+                'event1': parse_number(row[event1_col - 1]) if event1_col and len(row) >= event1_col else None,
+                'event2': parse_number(row[event2_col - 1]) if event2_col and len(row) >= event2_col else None,
+                'event3': parse_number(row[event3_col - 1]) if event3_col and len(row) >= event3_col else None,
+                'bonus_points': parse_number(row[bonus_col - 1]) if bonus_col and len(row) >= bonus_col else None,
                 'date': parse_date(row[date_col - 1]),
                 'link': row[link_col - 1] if len(row) >= link_col else '',
                 'country': row[8] if len(row) > 8 else '',
@@ -420,9 +420,9 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 \t\t\t\t<tr>
 \t\t\t\t\t<th>Player</th>
 \t\t\t\t\t<th>Total Score</th>
-\t\t\t\t\t<th>Hurdle Dash</th>
-\t\t\t\t\t<th>Pennant Capture</th>
-\t\t\t\t\t<th>Relay Run</th>
+\t\t\t\t\t<th>Event 1</th>
+\t\t\t\t\t<th>Event 2</th>
+\t\t\t\t\t<th>Event 3</th>
 \t\t\t\t\t<th>Bonus Points</th>
 \t\t\t\t\t<th>Date</th>
 \t\t\t\t\t<th>Proof</th>
@@ -432,9 +432,9 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 \t\t\t\t<tr data-proof="{proof_type}">
 \t\t\t\t\t<td>{current_record['player']}</td>
 \t\t\t\t\t<td>{int(current_record['total_score'])}</td>
-\t\t\t\t\t<td>{int(current_record['hurdle_dash']) if current_record['hurdle_dash'] else '--'}</td>
-\t\t\t\t\t<td>{int(current_record['pennant_capture']) if current_record['pennant_capture'] else '--'}</td>
-\t\t\t\t\t<td>{int(current_record['relay_run']) if current_record['relay_run'] else '--'}</td>
+\t\t\t\t\t<td>{int(current_record['event1']) if current_record['event1'] else '--'}</td>
+\t\t\t\t\t<td>{int(current_record['event2']) if current_record['event2'] else '--'}</td>
+\t\t\t\t\t<td>{int(current_record['event3']) if current_record['event3'] else '--'}</td>
 \t\t\t\t\t<td>{int(current_record['bonus_points']) if current_record['bonus_points'] else '--'}</td>
 \t\t\t\t\t<td>{current_record['date'].strftime("%d/%m/%Y")}</td>
 \t\t\t\t\t<td>{proof_link}</td>
@@ -453,9 +453,9 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 \t\t\t\t<tr>
 \t\t\t\t\t<th>Player</th>
 \t\t\t\t\t<th data-sort-method='number'>Total Score</th>
-\t\t\t\t\t<th data-sort-method='number'>Hurdle Dash</th>
-\t\t\t\t\t<th data-sort-method='number'>Pennant Capture</th>
-\t\t\t\t\t<th data-sort-method='number'>Relay Run</th>
+\t\t\t\t\t<th data-sort-method='number'>Event 1</th>
+\t\t\t\t\t<th data-sort-method='number'>Event 2</th>
+\t\t\t\t\t<th data-sort-method='number'>Event 3</th>
 \t\t\t\t\t<th data-sort-method='number'>Bonus Points</th>
 \t\t\t\t\t<th>Date</th>
 \t\t\t\t\t<th>Proof</th>
@@ -471,9 +471,9 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 \t\t\t\t<tr data-proof="{proof_type}">
 \t\t\t\t\t<td>{record['player']}</td>
 \t\t\t\t\t<td>{int(record['total_score'])}</td>
-\t\t\t\t\t<td>{int(record['hurdle_dash']) if record['hurdle_dash'] else '--'}</td>
-\t\t\t\t\t<td>{int(record['pennant_capture']) if record['pennant_capture'] else '--'}</td>
-\t\t\t\t\t<td>{int(record['relay_run']) if record['relay_run'] else '--'}</td>
+\t\t\t\t\t<td>{int(record['event1']) if record['event1'] else '--'}</td>
+\t\t\t\t\t<td>{int(record['event2']) if record['event2'] else '--'}</td>
+\t\t\t\t\t<td>{int(record['event3']) if record['event3'] else '--'}</td>
 \t\t\t\t\t<td>{int(record['bonus_points']) if record['bonus_points'] else '--'}</td>
 \t\t\t\t\t<td>{record['date'].strftime("%d/%m/%Y")}</td>
 \t\t\t\t\t<td>{proof_link}</td>
@@ -545,14 +545,45 @@ def generate_index_html():
     # Get course world records
     course_records = {}
     course_configs = {
-        'Speed': 'csv/Pokeathlon WRs - Speed_Course.csv',
-        'Power': 'csv/Pokeathlon WRs - Power_Course.csv', 
-        'Skill': 'csv/Pokeathlon WRs - Skill_Course.csv',
-        'Stamina': 'csv/Pokeathlon WRs - Stamina_Course.csv',
-        'Jump': 'csv/Pokeathlon WRs - Jump_Course.csv'
+        'Speed': {
+            'csv_file': 'csv/Pokeathlon WRs - Speed_Course.csv',
+            'event1_col': 3,  # Column C (Hurdle Dash)
+            'event2_col': 4,  # Column D (Pennant Capture)
+            'event3_col': 5,  # Column E (Relay Run)
+            'bonus_col': 6    # Column F (Bonus points)
+        },
+        'Power': {
+            'csv_file': 'csv/Pokeathlon WRs - Power_Course.csv',
+            'event1_col': 3,  # Column C (Block Smash)
+            'event2_col': 4,  # Column D (Circle Push)
+            'event3_col': 5,  # Column E (Goal Roll)
+            'bonus_col': 6    # Column F (Bonus points)
+        },
+        'Skill': {
+            'csv_file': 'csv/Pokeathlon WRs - Skill_Course.csv',
+            'event1_col': 3,  # Column C (Snow Throw)
+            'event2_col': 4,  # Column D (Goal Roll)
+            'event3_col': 5,  # Column E (Pennant Capture)
+            'bonus_col': 6    # Column F (Bonus points)
+        },
+        'Stamina': {
+            'csv_file': 'csv/Pokeathlon WRs - Stamina_Course.csv',
+            'event1_col': 3,  # Column C (Ring Drop)
+            'event2_col': 4,  # Column D (Relay Run)
+            'event3_col': 5,  # Column E (Block Smash)
+            'bonus_col': 6    # Column F (Bonus points)
+        },
+        'Jump': {
+            'csv_file': 'csv/Pokeathlon WRs - Jump_Course.csv',
+            'event1_col': 3,  # Column C (Lamp Jump)
+            'event2_col': 4,  # Column D (Disc Catch)
+            'event3_col': 5,  # Column E (Hurdle Dash)
+            'bonus_col': 6    # Column F (Bonus points)
+        }
     }
     
-    for course_name, csv_file in course_configs.items():
+    for course_name, config in course_configs.items():
+        csv_file = config['csv_file']
         if os.path.exists(csv_file):
             try:
                 with open(csv_file, newline='', encoding='utf-8') as f:
@@ -572,10 +603,10 @@ def generate_index_html():
                                         best_record = {
                                             'player': row[0].strip(),
                                             'total_score': int(total_score),
-                                            'event1': int(parse_number(row[2])) if parse_number(row[2]) else '--',
-                                            'event2': int(parse_number(row[3])) if parse_number(row[3]) else '--',
-                                            'event3': int(parse_number(row[4])) if parse_number(row[4]) else '--',
-                                            'bonus': int(parse_number(row[5])) if parse_number(row[5]) else '--',
+                                            'event1': int(parse_number(row[config['event1_col'] - 1])) if parse_number(row[config['event1_col'] - 1]) else '--',
+                                            'event2': int(parse_number(row[config['event2_col'] - 1])) if parse_number(row[config['event2_col'] - 1]) else '--',
+                                            'event3': int(parse_number(row[config['event3_col'] - 1])) if parse_number(row[config['event3_col'] - 1]) else '--',
+                                            'bonus': int(parse_number(row[config['bonus_col'] - 1])) if parse_number(row[config['bonus_col'] - 1]) else '--',
                                             'date': parse_date(row[6])  # Column G (Date)
                                         }
                                 except (ValueError, IndexError):
@@ -839,7 +870,7 @@ def generate_all_courses():
     print("🏆 Pokéathlon Course HTML Generator - Auto Mode")
     print("=" * 50)
     
-    # Define all courses with their configurations
+    # Define all courses with their configurations and specific event columns
     courses_config = {
         'Speed Course': {
             'csv_file': 'csv/Pokeathlon WRs - Speed_Course.csv',
@@ -847,7 +878,11 @@ def generate_all_courses():
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
             'output_file': 'courses/speed.html',
-            'lower_is_better': False  # Higher score is better for courses
+            'lower_is_better': False,  # Higher score is better for courses
+            'event1_col': 3,  # Column C (Hurdle Dash)
+            'event2_col': 4,  # Column D (Pennant Capture)
+            'event3_col': 5,  # Column E (Relay Run)
+            'bonus_col': 6    # Column F (Bonus points)
         },
         'Jump Course': {
             'csv_file': 'csv/Pokeathlon WRs - Jump_Course.csv',
@@ -855,7 +890,11 @@ def generate_all_courses():
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
             'output_file': 'courses/jump.html',
-            'lower_is_better': False
+            'lower_is_better': False,
+            'event1_col': 3,  # Column C (Lamp Jump)
+            'event2_col': 4,  # Column D (Disc Catch)
+            'event3_col': 5,  # Column E (Hurdle Dash)
+            'bonus_col': 6    # Column F (Bonus points)
         },
         'Power Course': {
             'csv_file': 'csv/Pokeathlon WRs - Power_Course.csv',
@@ -863,7 +902,11 @@ def generate_all_courses():
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
             'output_file': 'courses/power.html',
-            'lower_is_better': False
+            'lower_is_better': False,
+            'event1_col': 3,  # Column C (Block Smash)
+            'event2_col': 4,  # Column D (Circle Push)
+            'event3_col': 5,  # Column E (Goal Roll)
+            'bonus_col': 6    # Column F (Bonus points)
         },
         'Skill Course': {
             'csv_file': 'csv/Pokeathlon WRs - Skill_Course.csv',
@@ -871,7 +914,11 @@ def generate_all_courses():
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
             'output_file': 'courses/skill.html',
-            'lower_is_better': False
+            'lower_is_better': False,
+            'event1_col': 3,  # Column C (Snow Throw)
+            'event2_col': 4,  # Column D (Goal Roll)
+            'event3_col': 5,  # Column E (Pennant Capture)
+            'bonus_col': 6    # Column F (Bonus points)
         },
         'Stamina Course': {
             'csv_file': 'csv/Pokeathlon WRs - Stamina_Course.csv',
@@ -879,7 +926,11 @@ def generate_all_courses():
             'date_col': 7,   # Column G (Date)
             'link_col': 8,   # Column H (Link)
             'output_file': 'courses/stamina.html',
-            'lower_is_better': False
+            'lower_is_better': False,
+            'event1_col': 3,  # Column C (Ring Drop)
+            'event2_col': 4,  # Column D (Relay Run)
+            'event3_col': 5,  # Column E (Block Smash)
+            'bonus_col': 6    # Column F (Bonus points)
         }
     }
     
@@ -897,7 +948,7 @@ def generate_all_courses():
             continue
         
         try:
-            # Run the analysis and generate HTML
+            # Run the analysis and generate HTML with course-specific column mapping
             improved_rows = leaderboard_analysis_with_html(
                 csv_file, 
                 config['score_col'], 
@@ -906,7 +957,11 @@ def generate_all_courses():
                 course_name, 
                 config['output_file'], 
                 "advanced",  # Use advanced HTML style for courses
-                lower_is_better=config.get('lower_is_better', False)
+                lower_is_better=config.get('lower_is_better', False),
+                event1_col=config['event1_col'],
+                event2_col=config['event2_col'],
+                event3_col=config['event3_col'],
+                bonus_col=config['bonus_col']
             )
             
             total_improvements += len(improved_rows)
