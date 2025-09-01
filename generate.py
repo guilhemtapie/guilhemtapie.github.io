@@ -44,7 +44,7 @@ def event_format_proof_link(link, proof_type):
     else:
         return f'<a href="{link}">Link</a>'
 
-def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style, lower_is_better=False, event1_col=None, event2_col=None, event3_col=None, bonus_col=None):
+def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, course_name, output_html, html_style, lower_is_better=False, event1_col=None, event2_col=None, event3_col=None, bonus_col=None, event1_name=None, event2_name=None, event3_name=None):
     top_scores = []
     top3_changes = []
     
@@ -199,7 +199,7 @@ def leaderboard_analysis_with_html(file_path, score_col, date_col, link_col, cou
     if html_style == "simple":
         generate_simple_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html, lower_is_better=lower_is_better)
     else:
-        generate_advanced_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html)
+        generate_advanced_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_html, event1_name, event2_name, event3_name)
     
     # CSV export removed - only HTML generation needed
     
@@ -345,7 +345,7 @@ def generate_simple_html(course_name, all_records, top3_changes, first_holder_da
     
     print(f"\n✅ Simple HTML file generated: {output_file}")
 
-def generate_advanced_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_file):
+def generate_advanced_html(course_name, all_records, top3_changes, first_holder_days, top23_presence_days, output_file, event1_name=None, event2_name=None, event3_name=None):
     """Generate the advanced HTML file with filtering capabilities"""
 
     # Get current record (highest scoring record)
@@ -420,9 +420,9 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 \t\t\t\t<tr>
 \t\t\t\t\t<th>Player</th>
 \t\t\t\t\t<th>Total Score</th>
-\t\t\t\t\t<th>Event 1</th>
-\t\t\t\t\t<th>Event 2</th>
-\t\t\t\t\t<th>Event 3</th>
+\t\t\t\t\t<th>{event1_name or "Event 1"}</th>
+\t\t\t\t\t<th>{event2_name or "Event 2"}</th>
+\t\t\t\t\t<th>{event3_name or "Event 3"}</th>
 \t\t\t\t\t<th>Bonus Points</th>
 \t\t\t\t\t<th>Date</th>
 \t\t\t\t\t<th>Proof</th>
@@ -453,9 +453,9 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 \t\t\t\t<tr>
 \t\t\t\t\t<th>Player</th>
 \t\t\t\t\t<th data-sort-method='number'>Total Score</th>
-\t\t\t\t\t<th data-sort-method='number'>Event 1</th>
-\t\t\t\t\t<th data-sort-method='number'>Event 2</th>
-\t\t\t\t\t<th data-sort-method='number'>Event 3</th>
+\t\t\t\t\t<th data-sort-method='number'>{event1_name or "Event 1"}</th>
+\t\t\t\t\t<th data-sort-method='number'>{event2_name or "Event 2"}</th>
+\t\t\t\t\t<th data-sort-method='number'>{event3_name or "Event 3"}</th>
 \t\t\t\t\t<th data-sort-method='number'>Bonus Points</th>
 \t\t\t\t\t<th>Date</th>
 \t\t\t\t\t<th>Proof</th>
@@ -600,12 +600,46 @@ def generate_index_html():
                                     total_score = parse_number(row[1])  # Column B (Total Score)
                                     if total_score and total_score > best_score:
                                         best_score = total_score
+                                        # Calculate points using formulas based on course
+                                        event1_score = parse_number(row[config['event1_col'] - 1])
+                                        event2_score = parse_number(row[config['event2_col'] - 1])
+                                        event3_score = parse_number(row[config['event3_col'] - 1])
+                                        
+                                        # Apply formulas based on course
+                                        if course_name == 'Speed':
+                                            event1_points = int(11500 / event1_score) if event1_score else 0  # Hurdle Dash
+                                            event2_points = int(event2_score * 3) if event2_score else 0      # Pennant Capture
+                                            event3_points = int(event3_score * 10) if event3_score else 0     # Relay Run
+                                        elif course_name == 'Power':
+                                            event1_points = int(event1_score) if event1_score else 0          # Block Smash
+                                            event2_points = int(event2_score * 3) if event2_score else 0      # Circle Push
+                                            event3_points = int(event3_score * 1.5) if event3_score else 0    # Goal Roll
+                                        elif course_name == 'Skill':
+                                            event1_points = int(event1_score * 3) if event1_score else 0      # Snow Throw
+                                            event2_points = int(event2_score * 1.5) if event2_score else 0    # Goal Roll
+                                            event3_points = int(event3_score * 3) if event3_score else 0      # Pennant Capture
+                                        elif course_name == 'Stamina':
+                                            event1_points = int(event1_score * 1.5) if event1_score else 0    # Ring Drop
+                                            event2_points = int(event2_score * 10) if event2_score else 0     # Relay Run
+                                            event3_points = int(event3_score) if event3_score else 0          # Block Smash
+                                        elif course_name == 'Jump':
+                                            event1_points = int(event1_score / 3.5) if event1_score else 0    # Lamp Jump
+                                            event2_points = int(150 - (1500 / (event2_score + 12.5))) if event2_score else 0  # Disc Catch
+                                            event3_points = int(11500 / event3_score) if event3_score else 0  # Hurdle Dash
+                                        else:
+                                            event1_points = int(event1_score) if event1_score else 0
+                                            event2_points = int(event2_score) if event2_score else 0
+                                            event3_points = int(event3_score) if event3_score else 0
+                                        
                                         best_record = {
                                             'player': row[0].strip(),
                                             'total_score': int(total_score),
-                                            'event1': int(parse_number(row[config['event1_col'] - 1])) if parse_number(row[config['event1_col'] - 1]) else '--',
-                                            'event2': int(parse_number(row[config['event2_col'] - 1])) if parse_number(row[config['event2_col'] - 1]) else '--',
-                                            'event3': int(parse_number(row[config['event3_col'] - 1])) if parse_number(row[config['event3_col'] - 1]) else '--',
+                                            'event1': int(event1_score) if event1_score else '--',
+                                            'event2': int(event2_score) if event2_score else '--',
+                                            'event3': int(event3_score) if event3_score else '--',
+                                            'event1_points': event1_points,
+                                            'event2_points': event2_points,
+                                            'event3_points': event3_points,
                                             'bonus': int(parse_number(row[config['bonus_col'] - 1])) if parse_number(row[config['bonus_col'] - 1]) else '--',
                                             'date': parse_date(row[6])  # Column G (Date)
                                         }
@@ -755,9 +789,9 @@ def generate_index_html():
           <td><a href="courses/{course_name.lower()}.html">{course_name}</a></td>
           <td>{record['player']}</td>
           <td>{record['total_score']}</td>
-          <td>{record['event1']}</td>
-          <td>{record['event2']}</td>
-          <td>{record['event3']}</td>
+          <td>{record['event1_points']}</td>
+          <td>{record['event2_points']}</td>
+          <td>{record['event3_points']}</td>
           <td>{record['bonus']}</td>
           <td>{record['date'].strftime("%d/%m/%Y") if record['date'] else '--'}</td>
         </tr>'''
@@ -882,7 +916,10 @@ def generate_all_courses():
             'event1_col': 3,  # Column C (Hurdle Dash)
             'event2_col': 4,  # Column D (Pennant Capture)
             'event3_col': 5,  # Column E (Relay Run)
-            'bonus_col': 6    # Column F (Bonus points)
+            'bonus_col': 6,   # Column F (Bonus points)
+            'event1_name': 'Hurdle Dash',
+            'event2_name': 'Pennant Capture',
+            'event3_name': 'Relay Run'
         },
         'Jump Course': {
             'csv_file': 'csv/Pokeathlon WRs - Jump_Course.csv',
@@ -894,7 +931,10 @@ def generate_all_courses():
             'event1_col': 3,  # Column C (Lamp Jump)
             'event2_col': 4,  # Column D (Disc Catch)
             'event3_col': 5,  # Column E (Hurdle Dash)
-            'bonus_col': 6    # Column F (Bonus points)
+            'bonus_col': 6,   # Column F (Bonus points)
+            'event1_name': 'Lamp Jump',
+            'event2_name': 'Disc Catch',
+            'event3_name': 'Hurdle Dash'
         },
         'Power Course': {
             'csv_file': 'csv/Pokeathlon WRs - Power_Course.csv',
@@ -906,7 +946,10 @@ def generate_all_courses():
             'event1_col': 3,  # Column C (Block Smash)
             'event2_col': 4,  # Column D (Circle Push)
             'event3_col': 5,  # Column E (Goal Roll)
-            'bonus_col': 6    # Column F (Bonus points)
+            'bonus_col': 6,   # Column F (Bonus points)
+            'event1_name': 'Block Smash',
+            'event2_name': 'Circle Push',
+            'event3_name': 'Goal Roll'
         },
         'Skill Course': {
             'csv_file': 'csv/Pokeathlon WRs - Skill_Course.csv',
@@ -918,7 +961,10 @@ def generate_all_courses():
             'event1_col': 3,  # Column C (Snow Throw)
             'event2_col': 4,  # Column D (Goal Roll)
             'event3_col': 5,  # Column E (Pennant Capture)
-            'bonus_col': 6    # Column F (Bonus points)
+            'bonus_col': 6,   # Column F (Bonus points)
+            'event1_name': 'Snow Throw',
+            'event2_name': 'Goal Roll',
+            'event3_name': 'Pennant Capture'
         },
         'Stamina Course': {
             'csv_file': 'csv/Pokeathlon WRs - Stamina_Course.csv',
@@ -930,7 +976,10 @@ def generate_all_courses():
             'event1_col': 3,  # Column C (Ring Drop)
             'event2_col': 4,  # Column D (Relay Run)
             'event3_col': 5,  # Column E (Block Smash)
-            'bonus_col': 6    # Column F (Bonus points)
+            'bonus_col': 6,   # Column F (Bonus points)
+            'event1_name': 'Ring Drop',
+            'event2_name': 'Relay Run',
+            'event3_name': 'Block Smash'
         }
     }
     
@@ -961,7 +1010,10 @@ def generate_all_courses():
                 event1_col=config['event1_col'],
                 event2_col=config['event2_col'],
                 event3_col=config['event3_col'],
-                bonus_col=config['bonus_col']
+                bonus_col=config['bonus_col'],
+                event1_name=config['event1_name'],
+                event2_name=config['event2_name'],
+                event3_name=config['event3_name']
             )
             
             total_improvements += len(improved_rows)
