@@ -605,31 +605,10 @@ def generate_index_html():
                                         event2_score = parse_number(row[config['event2_col'] - 1])
                                         event3_score = parse_number(row[config['event3_col'] - 1])
                                         
-                                        # Apply formulas based on course
-                                        if course_name == 'Speed':
-                                            event1_points = int(11500 / event1_score) if event1_score else 0  # Hurdle Dash
-                                            event2_points = int(event2_score * 3) if event2_score else 0      # Pennant Capture
-                                            event3_points = int(event3_score * 10) if event3_score else 0     # Relay Run
-                                        elif course_name == 'Power':
-                                            event1_points = int(event1_score) if event1_score else 0          # Block Smash
-                                            event2_points = int(event2_score * 3) if event2_score else 0      # Circle Push
-                                            event3_points = int(event3_score * 5) if event3_score else 0      # Goal Roll: score * 5 (position points + score * 5, assuming position points = 0)
-                                        elif course_name == 'Skill':
-                                            event1_points = int(event1_score * 3) if event1_score else 0      # Snow Throw
-                                            event2_points = int(event2_score * 5) if event2_score else 0      # Goal Roll: score * 5 (position points + score * 5, assuming position points = 0)
-                                            event3_points = int(event3_score * 3) if event3_score else 0      # Pennant Capture
-                                        elif course_name == 'Stamina':
-                                            event1_points = int(event1_score * 1.5) if event1_score else 0    # Ring Drop
-                                            event2_points = int(event2_score * 10) if event2_score else 0     # Relay Run
-                                            event3_points = int(event3_score) if event3_score else 0          # Block Smash
-                                        elif course_name == 'Jump':
-                                            event1_points = int(event1_score / 3.5) if event1_score else 0    # Lamp Jump
-                                            event2_points = int(150 - (1500 / (event2_score + 12.5))) if event2_score else 0  # Disc Catch
-                                            event3_points = int(11500 / event3_score) if event3_score else 0  # Hurdle Dash
-                                        else:
-                                            event1_points = int(event1_score) if event1_score else 0
-                                            event2_points = int(event2_score) if event2_score else 0
-                                            event3_points = int(event3_score) if event3_score else 0
+                                        # Use the raw scores from CSV (points are already calculated in the CSV)
+                                        event1_points = int(event1_score) if event1_score else 0
+                                        event2_points = int(event2_score) if event2_score else 0
+                                        event3_points = int(event3_score) if event3_score else 0
                                         
                                         best_record = {
                                             'player': row[0].strip(),
@@ -637,9 +616,9 @@ def generate_index_html():
                                             'event1': int(event1_score) if event1_score else '--',
                                             'event2': int(event2_score) if event2_score else '--',
                                             'event3': int(event3_score) if event3_score else '--',
-                                            'event1_points': event1_points,
-                                            'event2_points': event2_points,
-                                            'event3_points': event3_points,
+                                            'event1_points': event1_points if event1_points > 0 else '--',
+                                            'event2_points': event2_points if event2_points > 0 else '--',
+                                            'event3_points': event3_points if event3_points > 0 else '--',
                                             'bonus': int(parse_number(row[config['bonus_col'] - 1])) if parse_number(row[config['bonus_col'] - 1]) else '--',
                                             'date': parse_date(row[6])  # Column G (Date)
                                         }
@@ -656,14 +635,27 @@ def generate_index_html():
     event_configs = {
         'Hurdle Dash': {'score_col': 2, 'lower_is_better': True},
         'Pennant Capture': {'score_col': 3, 'lower_is_better': False},
-        'Circle Push': {'score_col': 4, 'lower_is_better': False},
         'Block Smash': {'score_col': 5, 'lower_is_better': False},
         'Disc Catch': {'score_col': 6, 'lower_is_better': False},
         'Lamp Jump': {'score_col': 7, 'lower_is_better': False},
         'Relay Run': {'score_col': 8, 'lower_is_better': False},
-        'Ring Drop': {'score_col': 9, 'lower_is_better': False},
         'Snow Throw': {'score_col': 10, 'lower_is_better': False},
         'Goal Roll': {'score_col': 11, 'lower_is_better': False}
+    }
+    
+    # Set fixed values for Circle Push and Ring Drop
+    event_records['Circle Push'] = {
+        'player': '–',
+        'score': 66,
+        'points': 198,
+        'date': None
+    }
+    
+    event_records['Ring Drop'] = {
+        'player': '–',
+        'score': 200,
+        'points': 200,
+        'date': None
     }
     
     events_csv = 'csv/Pokeathlon WRs - Events_best_scores.csv'
@@ -684,27 +676,27 @@ def generate_index_html():
                                     if score is not None:
                                         # Calculate points using the correct formula for each event (only once)
                                         if event_name == 'Hurdle Dash':
-                                            points = int(11500 / score) if score else 0
+                                            points = min(200, int(11500 / score)) if score else 0
                                         elif event_name == 'Pennant Capture':
-                                            points = int(score * 3) if score else 0
+                                            points = min(200, int(score * 3)) if score else 0
                                         elif event_name == 'Circle Push':
-                                            points = int(score * 3) if score else 0
+                                            points = min(200, int(score * 3)) if score else 0
                                         elif event_name == 'Block Smash':
-                                            points = int(score) if score else 0
+                                            points = min(200, int(score)) if score else 0
                                         elif event_name == 'Disc Catch':
-                                            points = int(150 - (1500 / (score + 12.5))) if score else 0
+                                            points = min(200, int(150 - (1500 / (score + 12.5)))) if score else 0
                                         elif event_name == 'Lamp Jump':
-                                            points = int(score / 3.5) if score else 0
+                                            points = min(200, int(score / 3.5)) if score else 0
                                         elif event_name == 'Relay Run':
-                                            points = int(score * 10) if score else 0
+                                            points = min(200, int(score * 10)) if score else 0
                                         elif event_name == 'Ring Drop':
-                                            points = int(score * 1.5) if score else 0
+                                            points = min(200, int(score * 1.5)) if score else 0
                                         elif event_name == 'Snow Throw':
-                                            points = int(score * 3) if score else 0
+                                            points = min(200, int(score * 3)) if score else 0
                                         elif event_name == 'Goal Roll':
-                                            points = int(score * 5) if score else 0  # Assuming position points = 0
+                                            points = min(200, int(score * 5)) if score else 0  # Assuming position points = 0
                                         else:
-                                            points = int(score) if score else 0
+                                            points = min(200, int(score)) if score else 0
                                         
                                         if best_score is None:
                                             best_score = score
@@ -1073,12 +1065,6 @@ def generate_all_events():
             'link_col': 13,  # Column M (Link)
             'output_file': 'events/pennant-capture.html'
         },
-        'Circle Push': {
-            'score_col': 4,  # Column D (Circle Push)
-            'date_col': 12,  # Column L (Date)
-            'link_col': 13,  # Column M (Link)
-            'output_file': 'events/circle-push.html'
-        },
         'Block Smash': {
             'score_col': 5,  # Column E (Block Smash)
             'date_col': 12,  # Column L (Date)
@@ -1102,12 +1088,6 @@ def generate_all_events():
             'date_col': 12,  # Column L (Date)
             'link_col': 13,  # Column M (Link)
             'output_file': 'events/relay-run.html'
-        },
-        'Ring Drop': {
-            'score_col': 9,  # Column I (Ring Drop)
-            'date_col': 12,  # Column L (Date)
-            'link_col': 13,  # Column M (Link)
-            'output_file': 'events/ring-drop.html'
         },
         'Snow Throw': {
             'score_col': 10,  # Column J (Snow Throw)
