@@ -512,8 +512,8 @@ def get_event_records():
     
     # Fixed values for events without pages
     event_records = {
-        'Circle Push': {'player': '–', 'score': 66, 'points': 198, 'date': None},
-        'Ring Drop': {'player': '–', 'score': 200, 'points': 200, 'date': None}
+        'Circle Push': {'player': '–', 'score': 66, 'points': 198, 'date': datetime.strptime('12/09/2009', '%d/%m/%Y').date()},
+        'Ring Drop': {'player': '–', 'score': 200, 'points': 200, 'date': datetime.strptime('12/09/2009', '%d/%m/%Y').date()}
     }
     
     events_csv = 'csv/Pokeathlon WRs - Events_best_scores.csv'
