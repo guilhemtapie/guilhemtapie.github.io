@@ -444,7 +444,7 @@ def generate_advanced_html(course_name, all_records, top3_changes, first_holder_
 \t\t</div>'''
 
     # Record History section
-    html_content += '''
+    html_content += f'''
 
 \t\t<h2>Record History</h2>
 \t\t<div class="table-wrapper">
@@ -613,10 +613,10 @@ def generate_index_html():
                                         elif course_name == 'Power':
                                             event1_points = int(event1_score) if event1_score else 0          # Block Smash
                                             event2_points = int(event2_score * 3) if event2_score else 0      # Circle Push
-                                            event3_points = int(event3_score * 1.5) if event3_score else 0    # Goal Roll
+                                            event3_points = int(event3_score * 5) if event3_score else 0      # Goal Roll: score * 5 (position points + score * 5, assuming position points = 0)
                                         elif course_name == 'Skill':
                                             event1_points = int(event1_score * 3) if event1_score else 0      # Snow Throw
-                                            event2_points = int(event2_score * 1.5) if event2_score else 0    # Goal Roll
+                                            event2_points = int(event2_score * 5) if event2_score else 0      # Goal Roll: score * 5 (position points + score * 5, assuming position points = 0)
                                             event3_points = int(event3_score * 3) if event3_score else 0      # Pennant Capture
                                         elif course_name == 'Stamina':
                                             event1_points = int(event1_score * 1.5) if event1_score else 0    # Ring Drop
@@ -682,12 +682,36 @@ def generate_index_html():
                                 try:
                                     score = parse_number(row[config['score_col'] - 1])
                                     if score is not None:
+                                        # Calculate points using the correct formula for each event (only once)
+                                        if event_name == 'Hurdle Dash':
+                                            points = int(11500 / score) if score else 0
+                                        elif event_name == 'Pennant Capture':
+                                            points = int(score * 3) if score else 0
+                                        elif event_name == 'Circle Push':
+                                            points = int(score * 3) if score else 0
+                                        elif event_name == 'Block Smash':
+                                            points = int(score) if score else 0
+                                        elif event_name == 'Disc Catch':
+                                            points = int(150 - (1500 / (score + 12.5))) if score else 0
+                                        elif event_name == 'Lamp Jump':
+                                            points = int(score / 3.5) if score else 0
+                                        elif event_name == 'Relay Run':
+                                            points = int(score * 10) if score else 0
+                                        elif event_name == 'Ring Drop':
+                                            points = int(score * 1.5) if score else 0
+                                        elif event_name == 'Snow Throw':
+                                            points = int(score * 3) if score else 0
+                                        elif event_name == 'Goal Roll':
+                                            points = int(score * 5) if score else 0  # Assuming position points = 0
+                                        else:
+                                            points = int(score) if score else 0
+                                        
                                         if best_score is None:
                                             best_score = score
                                             best_record = {
                                                 'player': row[0].strip(),
                                                 'score': score,
-                                                'points': int(parse_number(row[config['score_col'] - 1])) if not config['lower_is_better'] else int(parse_number(row[config['score_col'] - 1])),
+                                                'points': points,
                                                 'date': parse_date(row[11])  # Column L (Date)
                                             }
                                         elif config['lower_is_better']:
@@ -696,7 +720,7 @@ def generate_index_html():
                                                 best_record = {
                                                     'player': row[0].strip(),
                                                     'score': score,
-                                                    'points': int(parse_number(row[config['score_col'] - 1])),
+                                                    'points': points,
                                                     'date': parse_date(row[11])
                                                 }
                                         else:
@@ -705,7 +729,7 @@ def generate_index_html():
                                                 best_record = {
                                                     'player': row[0].strip(),
                                                     'score': score,
-                                                    'points': int(parse_number(row[config['score_col'] - 1])),
+                                                    'points': points,
                                                     'date': parse_date(row[11])
                                                 }
                                 except (ValueError, IndexError):
